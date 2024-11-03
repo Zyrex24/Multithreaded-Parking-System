@@ -53,16 +53,6 @@ git clone --single-branch --branch master https://github.com/Zyrex24/Multithread
 cd Multithreaded-Parking-System-Simulation
 ```
 
-2. Compile the project:
-```bash
-javac src/main/java/Main.java
-```
-
-3. Run the simulation:
-```bash
-java -cp src/main/java Main
-```
-
 ## Input File Format
 
 The system expects an input file (`input.txt`) in the following format:
