@@ -31,13 +31,14 @@ This project simulates a parking lot system with the following specifications:
 src/
 ├── main/
 │   ├── java/
-│   │   ├── models/
+│   │   ├── classes/
 │   │   │   ├── Car.java
 │   │   │   ├── Gate.java
-│   │   │   └── ParkingLot.java
-│   │   ├── utils/
-│   │   │   ├── FileParser.java
+│   │   │   └── Parking.java
+│   │   ├── io/
+│   │   │   ├── FileReader.java
 │   │   │   └── Logger.java
+│   │   │   └── InputReceiver.java
 │   │   └── Main.java
 │   └── resources/
 └──│       └── input.txt
@@ -48,8 +49,8 @@ src/
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/parking-system.git
-cd parking-system
+git clone https://github.com/Zyrex24/Multithreaded-Parking-System-Simulation.git
+cd Multithreaded-Parking-System-Simulation
 ```
 
 2. Compile the project:
