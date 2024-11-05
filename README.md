@@ -48,7 +48,7 @@ src/
 ## Getting Started
 
 1. Clone the repository:
-```bash
+```
 git clone --single-branch --branch master https://github.com/Zyrex24/Multithreaded-Parking-System-Simulation.git
 cd Multithreaded-Parking-System-Simulation
 ```
