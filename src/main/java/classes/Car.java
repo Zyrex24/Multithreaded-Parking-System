@@ -1,7 +1,6 @@
 package classes;
 
 import io.Logger;
-import io.Statistics;
 
 public class Car extends Thread {
     private final int carId;
@@ -33,8 +32,29 @@ public class Car extends Thread {
         return arrivalTime;
     }
 
+    // In Car.java
     @Override
     public void run() {
+        try {
+            // Simulate arrival delay
+            Thread.sleep(arrivalTime * 1000L);
+            Logger.log("Car " + carId + " from Gate " + gateId + " arrived at time " + arrivalTime);
 
+            // Attempt to park, logging if waiting or parked
+            boolean parked = parkingLot.parkCar(this);
+            if (!parked) {
+                Logger.log("Car " + carId + " from Gate " + gateId + " waiting for a spot.");
+                parkingLot.waitForSpot(this);
+            }
+
+            // Simulate parking duration
+            Thread.sleep(parkingDuration * 1000L);
+
+            // Leave the parking lot and log the departure
+            parkingLot.leaveCar(this, parkingDuration);
+        } catch (InterruptedException e) {
+            Logger.log("Car " + carId + " was interrupted.");
+        }
     }
+
 }
