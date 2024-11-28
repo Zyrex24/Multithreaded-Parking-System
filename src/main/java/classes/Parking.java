@@ -1,16 +1,22 @@
 package classes;
 
-import io.Logger;
-import io.Statistics;
 import java.util.concurrent.Semaphore;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+
+import io.Logger;
 
 public class Parking {
-    private final semaphore parkingSpots;
-    private static Parking instance;
+    private final Semaphore parkingSpots;
     private int occupiedSpots = 0;
+    private final Queue<Integer> carsServedByGate = new LinkedList<>();
+    private int totalCarsServed = 0;
+    private static Parking instance;
 
-    public Parking(int totalSpots) {
-        this.parkingSpots = new semaphore(totalSpots);
+    private Parking(int totalSpots) {
+        this.parkingSpots = new Semaphore(totalSpots);
     }
 
     public static synchronized Parking getInstance() {
@@ -20,14 +26,14 @@ public class Parking {
         return instance;
     }
 
-    // In Parking.java
-    public boolean parkCar(Car car) throws InterruptedException {
-        if (parkingSpots.tryacquire()) {
+    public boolean parkCar(Car car) {
+        if (parkingSpots.tryAcquire()) { // Try to acquire a spot
             synchronized (this) {
                 occupiedSpots++;
-                Statistics.carEntered(car.getGateId(), car.getCarId(), 0); // No wait time if acquired immediately
-                Logger.log("Car " + car.getCarId() + " from Gate " + car.getGateId() + " parked. (Parking Status: "
-                        + occupiedSpots + " spots occupied)");
+                totalCarsServed++;
+                carsServedByGate.add(car.getGateId());
+                Logger.log("Car " + car.getCarId() + " from Gate " + car.getGateId()
+                        + " parked. (Parking Status: " + occupiedSpots + " spots occupied)");
             }
             return true;
         }
@@ -35,29 +41,42 @@ public class Parking {
     }
 
     public void waitForSpot(Car car) throws InterruptedException {
-        parkingSpots.Acquire(occupiedSpots);
-        ; // Wait until a spot is available
+        long startTime = System.currentTimeMillis();
+        parkingSpots.acquire(); // Block until a spot is available
         synchronized (this) {
             occupiedSpots++;
-            long waitTime = System.currentTimeMillis();
-            Statistics.carEntered(car.getGateId(), car.getCarId(), waitTime);
+            totalCarsServed++;
+            carsServedByGate.add(car.getGateId());
+            long waitTime = System.currentTimeMillis() - startTime;
             Logger.log("Car " + car.getCarId() + " from Gate " + car.getGateId()
                     + " parked after waiting. (Parking Status: " + occupiedSpots + " spots occupied)");
         }
     }
 
-    public synchronized void leaveCar(Car car, int parkingDuration) {
-        parkingSpots.Release();
+    public void leaveCar(Car car, int parkingDuration) {
         synchronized (this) {
             occupiedSpots--;
+            parkingSpots.release();
             Logger.log("Car " + car.getCarId() + " from Gate " + car.getGateId()
                     + " left after " + parkingDuration + " units of time. (Parking Status: " + occupiedSpots
                     + " spots occupied)");
-            Statistics.carExited(car.getCarId());
         }
     }
 
-    public synchronized int getOccupiedSpots() {
-        return occupiedSpots;
+    public synchronized void printSimulationDetails() {
+        System.out.println("\nSimulation Details:");
+        System.out.println("Total Cars Served: " + totalCarsServed);
+        System.out.println("Current Cars in Parking: " + occupiedSpots);
+
+        // Calculate gate statistics dynamically
+        Map<Integer, Integer> gateCounts = new HashMap<>();
+        for (int gateId : carsServedByGate) {
+            gateCounts.put(gateId, gateCounts.getOrDefault(gateId, 0) + 1);
+        }
+
+        System.out.println("Details:");
+        for (Map.Entry<Integer, Integer> entry : gateCounts.entrySet()) {
+            System.out.println("- Gate " + entry.getKey() + " served " + entry.getValue() + " cars.");
+        }
     }
 }

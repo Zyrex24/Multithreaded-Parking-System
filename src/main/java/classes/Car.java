@@ -28,11 +28,6 @@ public class Car extends Thread {
         this.gateId = gateId;
     }
 
-    public int getArrivalTime() {
-        return arrivalTime;
-    }
-
-    // In Car.java
     @Override
     public void run() {
         try {
@@ -40,7 +35,7 @@ public class Car extends Thread {
             Thread.sleep(arrivalTime * 1000L);
             Logger.log("Car " + carId + " from Gate " + gateId + " arrived at time " + arrivalTime);
 
-            // Attempt to park, logging if waiting or parked
+            // Try parking, if no spot is available, wait for one
             boolean parked = parkingLot.parkCar(this);
             if (!parked) {
                 Logger.log("Car " + carId + " from Gate " + gateId + " waiting for a spot.");
@@ -56,5 +51,4 @@ public class Car extends Thread {
             Logger.log("Car " + carId + " was interrupted.");
         }
     }
-
 }
