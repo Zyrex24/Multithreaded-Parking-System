@@ -1,22 +1,21 @@
 package classes;
 
-import java.util.concurrent.Semaphore;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-
+import classes.semaphore;
 import io.Logger;
 
 public class Parking {
-    private final Semaphore parkingSpots;
+    private final semaphore parkingSpots;
     private int occupiedSpots = 0;
     private final Queue<Integer> carsServedByGate = new LinkedList<>();
     private int totalCarsServed = 0;
     private static Parking instance;
 
     private Parking(int totalSpots) {
-        this.parkingSpots = new Semaphore(totalSpots);
+        this.parkingSpots = new semaphore(totalSpots);
     }
 
     public static synchronized Parking getInstance() {
@@ -27,7 +26,7 @@ public class Parking {
     }
 
     public boolean parkCar(Car car) {
-        if (parkingSpots.tryAcquire()) { // Try to acquire a spot
+        if (parkingSpots.tryacquire()) { // Try to acquire a spot
             synchronized (this) {
                 occupiedSpots++;
                 totalCarsServed++;
@@ -42,7 +41,8 @@ public class Parking {
 
     public void waitForSpot(Car car) throws InterruptedException {
         long startTime = System.currentTimeMillis();
-        parkingSpots.acquire(); // Block until a spot is available
+        parkingSpots.Acquire(totalCarsServed);
+        ; // Block until a spot is available
         synchronized (this) {
             occupiedSpots++;
             totalCarsServed++;
@@ -56,7 +56,7 @@ public class Parking {
     public void leaveCar(Car car, int parkingDuration) {
         synchronized (this) {
             occupiedSpots--;
-            parkingSpots.release();
+            parkingSpots.Release();
             Logger.log("Car " + car.getCarId() + " from Gate " + car.getGateId()
                     + " left after " + parkingDuration + " units of time. (Parking Status: " + occupiedSpots
                     + " spots occupied)");
@@ -67,13 +67,10 @@ public class Parking {
         System.out.println("\nSimulation Details:");
         System.out.println("Total Cars Served: " + totalCarsServed);
         System.out.println("Current Cars in Parking: " + occupiedSpots);
-
-        // Calculate gate statistics dynamically
         Map<Integer, Integer> gateCounts = new HashMap<>();
         for (int gateId : carsServedByGate) {
             gateCounts.put(gateId, gateCounts.getOrDefault(gateId, 0) + 1);
         }
-
         System.out.println("Details:");
         for (Map.Entry<Integer, Integer> entry : gateCounts.entrySet()) {
             System.out.println("- Gate " + entry.getKey() + " served " + entry.getValue() + " cars.");
